@@ -11,7 +11,7 @@ try:
 except sqlite3.Error as e:
     print(e)
 
-uri = "mongodb+srv://ikthor:Earl14ItR4mKnvlf@cluster0.zxomsvv.mongodb.net/?retryWrites=true&w=majority"
+uri = ""
 mongo_client = MongoClient(uri)
 mongo_db = mongo_client['HostelApp']
 hostel_app = mongo_db['hostels_info']
@@ -356,7 +356,7 @@ def display_hostel(hostel, guest_id):
         room_type_key = 'room_type ' + str(hostel[0])
         in_date = st.date_input('Дата въезда', min_value=date.today(), max_value=(date.today() + timedelta(weeks=4)),
                                 key=in_date_key)
-        out_date = st.date_input('Дата въезда', min_value=(date.today() + timedelta(days=1)),
+        out_date = st.date_input('Дата отъезда', min_value=(date.today() + timedelta(days=1)),
                                  max_value=(date.today() + timedelta(weeks=4, days=1)), key=out_date_key,
                                  value=(date.today() + timedelta(days=1)))
     room_type_choice = st.selectbox('Тип номера', [x[1] for x in db_room_types], key=room_type_key)
@@ -414,11 +414,13 @@ def registrate_guest():
 
 def settle_guest(guest_id, room_book_id):
     st.subheader('Введите паспортные данные гостя')
+
     check_data_key = 'check_data' + str(guest_id)
     form_key = 'add_passport' + str(guest_id)
     if st.button('Заселить', key=21321):
-        status_id = c.execute("SELECT status_id FROM Room_book WHERE room_book_id = ?", (room_book_id,)).fetchone()[0]
-        if status_id == 2:
+        status_id = c.execute("SELECT status_id FROM Room_book WHERE room_book_id = ?", (room_book_id,)).fetchone()
+        print(status_id[0])
+        if status_id[0] == 2:
             if passport_app.find_one({"_id": guest_id}):
                 c.execute("UPDATE Room_book SET status_id = ? WHERE room_book_id = ?", (3, room_book_id,))
                 conn.commit()
